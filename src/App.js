@@ -1,19 +1,17 @@
 import logo from './logo.svg';
 import './App.css';
 import UploadToPinata from './UploadToPinata';
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import ConnectWallet from './ConnectWallet';
 import ShowAsset from './ShowAsset';
 
 import DecentralizedDataMarketJson from './utils/DecentralizedDataMarket.json';
 const contractABI = DecentralizedDataMarketJson.abi;
-
-const GATEWAY_URL = 'https://ipfs.io/ipfs/';
+const CONTRACT_ADDRESS = '0xD5a640fAC82FD990D8594b4618baE3ED56ADE066';
 
 function App() {
-  const [currentAccount, setCurrentAccount] = useState(null);
-  const [contractAddress, setContractAddress] = useState(null);
 
+  const [currentAccount, setCurrentAccount] = useState(null);
   const [cid, setCid] = useState(null);
   const [imageUrl, setImageUrl] = useState(null);
 
@@ -28,11 +26,15 @@ function App() {
           <div>
             <p>Current address: {currentAccount}</p>
             <img src={logo} className="App-logo" alt="logo" style={{height:200, width:200}} />
-            <UploadToPinata cid={cid} />
+            <UploadToPinata 
+              cid={cid} 
+              contractAddress={CONTRACT_ADDRESS}
+              contractABI={contractABI}
+            />
             <ShowAsset 
               cid={cid} 
               setCid={setCid} 
-              contractAddress={contractAddress}
+              contractAddress={CONTRACT_ADDRESS}
               contractABI={contractABI}
               imageUrl={imageUrl}
               setImageUrl={setImageUrl}
