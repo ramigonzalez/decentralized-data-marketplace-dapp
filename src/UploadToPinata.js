@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
 import axios from 'axios';
+import { ethers } from "ethers";
+const DataCategory = { PUBLIC: 1, PRIVATE: 2, CONFIDENTIAL: 3 }
 
-const UploadToPinata = ({ cid }) => {
+const UploadToPinata = ({ cid, contractAddress, contractABI }) => {
   const [file, setFile] = useState(null);
   const [error, setError] = useState(null);
   const [upload, setUpload] = useState(false);
@@ -35,8 +37,20 @@ const UploadToPinata = ({ cid }) => {
           },
         }
       );
+      const ipfsHash = response.data.IpfsHash;
+      console.log("Asset uploaded with CID: ",ipfsHash);
 
-      console.log("Asset uploaded with CID: ",response.data.IpfsHash);
+      const { ethereum } = window;
+      if (!ethereum) { 
+        console.log("Ethereum object not found!")
+        return;
+      }
+      const provider = new ethers.providers.Web3Provider(ethereum);
+      const signer = provider.getSigner();
+      const decentralizedDataMarketContract = new ethers.Contract(contractAddress, contractABI, signer);
+      const mintTx = await decentralizedDataMarketContract.mintDataToken(ipfsHash, DataCategory.PUBLIC);
+      await mintTx.wait();
+      console.log("Mined tx ->", mintTx.hash);
       setError(null);
       setUpload(false);
     } catch (error) {
