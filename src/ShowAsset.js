@@ -3,7 +3,7 @@ import { ethers } from "ethers";
 const GATEWAY_URL = 'https://ipfs.io/ipfs/';
 
 function ShowAsset({ cid, setCid, contractAddress, contractABI, imageUrl, setImageUrl }) {
-  const [tokenId, setTokenId] = useState(null);
+  const [tokenId, setTokenId] = useState("");
   const [downloadURL, setDownloadURL] = useState(null);
   const [error, setError] = useState(null);
 
@@ -32,7 +32,6 @@ function ShowAsset({ cid, setCid, contractAddress, contractABI, imageUrl, setIma
       return;
     }
     try {
-      debugger
       const { ethereum } = window;
       if (!ethereum) { 
         console.log("Ethereum object not found!")
