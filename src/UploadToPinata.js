@@ -7,6 +7,7 @@ const UploadToPinata = ({ cid, contractAddress, contractABI }) => {
   const [file, setFile] = useState(null);
   const [error, setError] = useState(null);
   const [upload, setUpload] = useState(false);
+  const [selectedItem, setSelectedItem] = useState('');
   
   const handleFileChange = (event) => {
     setFile(event.target.files[0]);
@@ -17,6 +18,10 @@ const UploadToPinata = ({ cid, contractAddress, contractABI }) => {
 
     if (!file) {
       setError('Please select an image to upload.');
+      return;
+    }
+    if (!selectedItem) {
+      setError('Please select an access level.');
       return;
     }
 
@@ -48,7 +53,11 @@ const UploadToPinata = ({ cid, contractAddress, contractABI }) => {
       const provider = new ethers.providers.Web3Provider(ethereum);
       const signer = provider.getSigner();
       const decentralizedDataMarketContract = new ethers.Contract(contractAddress, contractABI, signer);
-      const mintTx = await decentralizedDataMarketContract.mintDataToken(ipfsHash, DataCategory.PUBLIC);
+      const mintTx = await decentralizedDataMarketContract.mintDataToken(
+        ipfsHash,
+        selectedItem,
+        { value: ethers.utils.parseEther('0.001') }
+      );
       await mintTx.wait();
       console.log("Mined tx ->", mintTx.hash);
       setError(null);
@@ -57,6 +66,10 @@ const UploadToPinata = ({ cid, contractAddress, contractABI }) => {
       console.error('Error uploading to Pinata:', error);
       setError('An error occurred while uploading the image.');
     }
+  };
+
+  const handleSelectChange = (event) => {
+    setSelectedItem(event.target.value);
   };
 
   return (
@@ -68,8 +81,19 @@ const UploadToPinata = ({ cid, contractAddress, contractABI }) => {
       {
         upload && 
         <form onSubmit={handleSubmit}>
-          <label htmlFor="file">Select a file:</label>
-          <input type="file" id="file" onChange={handleFileChange} />
+          <div>
+            <label htmlFor="file">Select a file:</label>
+            <input type="file" id="file" onChange={handleFileChange} />
+          </div>
+          <div>
+            <label htmlFor="items">Access Level:</label>
+            <select id="items" value={selectedItem} onChange={handleSelectChange}>
+              <option value="">Select...</option>
+              <option value={DataCategory.PUBLIC}>PUBLIC</option>
+              <option value={DataCategory.PRIVATE}>PRIVATE</option>
+              <option value={DataCategory.CONFIDENTIAL}>CONFIDENTIAL</option>
+            </select>
+          </div>
           <button type="submit">Upload file</button>
           {error && <p className="error">{error}</p>}
         </form>
